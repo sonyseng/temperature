@@ -1,0 +1,18 @@
+.temperatureTable {
+    width: 300px;
+}
+
+.temperatureTable thead {
+    text-align: center;
+}
+
+.temperatureTable thead tr td {
+    padding: 10px 0;
+    background-color: #222736;
+    color: #fff;
+}
+
+.temperatureTable tbody tr td {
+    padding: 7px 10px;
+    color: #222736;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="temperatureApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Temperature Logger</title>
+
+    <link rel="stylesheet" href="app.css" />
+</head>
+<body ng-controller="appController">
+
+
+    <div class="display-wrapper">
+        <h1>Temperature Logger</h1>
+
+        <form class="temperature-input-form">
+            <input class="input-box" type="number" step=".001" ng-model="model.inputTemp" placeholder="Add Temperature"/>
+            <button class="input-button" ng-click="addTemperature(model.inputTemp)">Write</button>
+        </form>
+
+        <temperature-table temperature-list="model.tempList"></temperature-table>
+
+        <section class="errorText" ng-class="{'hidden': !model.errorText}">
+            {{model.errorText}}
+        </section>
+
+        <!--<temperature-chart temperature-list="model.tempList"></temperature-chart>-->
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

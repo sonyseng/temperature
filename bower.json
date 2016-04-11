@@ -1,0 +1,22 @@
+{
+  "name": "temperature",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Sony Seng"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.3",
+    "angular-mocks": "^1.5.3"
+  }
+}

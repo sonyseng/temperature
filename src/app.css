@@ -1,0 +1,31 @@
+html,body {
+    height: 100%;
+    font-family: 'Arial';
+}
+
+body * {
+    box-sizing:  border-box;
+}
+
+.hidden {
+    display: none;
+}
+
+.display-wrapper {
+    margin: 0 auto;
+    width: 330px;
+}
+
+.temperature-input-form {
+    display: block;
+    margin: 10px 2px;
+}
+
+.temperature-input-form .input-box {
+    height: 30px;
+}
+
+.temperature-input-form .input-button {
+    height: 30px;
+    width: 75px;
+}
