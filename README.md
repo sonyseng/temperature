@@ -1,6 +1,6 @@
 # Temperature Logger
 
-### Prequisites
+### Prerequisites
 
 Install the latest nodejs & npm. Found here: [NodeJs](https://nodejs.org/en/download/)
 
