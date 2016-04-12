@@ -14,7 +14,7 @@ npm install -g bower
 Install the latest gulp. Found here: [Gulp](http://gulpjs.com/)
 
 ```
-npm install --g gulp-cli
+npm install -g gulp-cli
 ```
 
 ### Build the source
