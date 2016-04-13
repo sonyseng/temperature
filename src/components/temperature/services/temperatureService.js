@@ -31,7 +31,7 @@ angular.module('components.temperature')
                         case INITIAL_REQUEST_ID:
                             if (data.result) {
                                 // Process Initial temperature readings. This should only happen once
-                                self.processTemperatureReadingsResponse(data.result);
+                                self.processReadingsResponse(data.result);
                                 onReadingsChange && onReadingsChange(event);
                             }
 
@@ -42,7 +42,7 @@ angular.module('components.temperature')
                         case MONITOR_REQUEST_ID:
                             if (data.result) {
                                 // Process subsequent Temperature readings
-                                self.processTemperatureReadingsResponse([data.result]);
+                                self.processReadingsResponse([data.result]);
                                 onReadingsChange && onReadingsChange(event);
                             }
                             break;
@@ -70,7 +70,13 @@ angular.module('components.temperature')
                 socket.request(msg);
             },
 
+            clearReadings: function () {
+                this.temperatureReadings.length = 0;
+            },
+
             requestInitialReadings: function () {
+                this.clearReadings();
+
                 socket.request({calls: [
                     {
                         id: INITIAL_REQUEST_ID,
@@ -81,7 +87,7 @@ angular.module('components.temperature')
             },
 
             // When we get readings data, add it to our service temp. readings collection
-            processTemperatureReadingsResponse: function (result) {
+            processReadingsResponse: function (result) {
                 var temperatureReadings = result.map(function (reading) {
                     return {timestamp: reading[0] * 1000, value: reading[1]};
                 });
@@ -90,11 +96,11 @@ angular.module('components.temperature')
                 this.temperatureReadings.length = Math.min(this.temperatureReadings.length, this.limit);
             },
 
-            getTemperatureReadings: function () {
+            getReadings: function () {
                 return this.temperatureReadings;
             },
 
-            addTemperature: function (temperature) {
+            addReading: function (temperature) {
                 socket.request({calls: [
                     {
                         id: WRITE_REQUEST_ID,

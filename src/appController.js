@@ -13,13 +13,13 @@ angular.module('temperatureApp')
             temperatureService.connect(CIK, onReadingsChange, onError);
 
             $scope.addTemperature = function (temperature) {
-                temperatureService.addTemperature(temperature);
+                temperatureService.addReading(temperature);
             };
 
             function onReadingsChange () {
                 $scope.$apply(function () {
                     $scope.model.errorText = null;
-                    $scope.model.tempList = temperatureService.getTemperatureReadings();
+                    $scope.model.tempList = temperatureService.getReadings();
                 });
             }
 
