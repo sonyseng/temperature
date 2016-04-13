@@ -15,4 +15,5 @@
 .temperatureTable tbody tr td {
     padding: 7px 10px;
     color: #222736;
+    text-align: right;
 }

@@ -1,7 +1,7 @@
 angular.module('temperatureApp')
     .controller('appController', [
         '$scope',
-        'components.temperature.temperatureService',
+        'temperatureService',
 
         function ($scope, temperatureService) {
             var CIK = '7f940ede6780511040e8ccedf8b52c1895ba1418';

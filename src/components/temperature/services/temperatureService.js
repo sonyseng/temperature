@@ -1,104 +1,81 @@
 angular.module('components.temperature')
-    .factory('components.temperature.temperatureService', [function () {
+    .factory('temperatureService', ['websocketService', function (websocketService) {
         var socket;
 
         var URL = 'wss://m2.exosite.com/ws';
         var ENDPOINT = 'temperature';
+
         var INITIAL_REQUEST_ID = 1;
         var MONITOR_REQUEST_ID = 2;
         var WRITE_REQUEST_ID = 3;
+
         var LIMIT = 5;
 
         var service = {
-            temperatureReadings: [],
             limit: LIMIT,
+
+            temperatureReadings: [],
 
             connect: function (cik, onReadingsChange, onError) {
                 var self = this;
-                var isAuthenticated = false;
 
-                socket = new WebSocket(URL);
+                socket = new websocketService.ExositeWebSocket(cik, URL, onAuth, onResponse, onError, true);
+                socket.connect();
 
-                socket.onopen = function () {
-                    self.sendMsg({auth: {cik: cik}});
-                };
+                function onAuth () {
+                    self.requestInitialReadings(self.limit);
+                }
 
-                // Handle the message type lifecycle
-                socket.onmessage = function (event) {
-                    var data = event.data ? JSON.parse(event.data) : null;
-                    data = angular.isArray(data) ? data[0] : data;
+                function onResponse (data) {
+                    switch(data.id) {
+                        case INITIAL_REQUEST_ID:
+                            if (data.result) {
+                                // Process Initial temperature readings. This should only happen once
+                                self.processTemperatureReadingsResponse(data.result);
+                                onReadingsChange && onReadingsChange(event);
+                            }
 
-                    if (isAuthenticated && data && data.status === 'ok') {
-                        switch(data.id) {
-                            case INITIAL_REQUEST_ID:
-                                if (data.result) {
-                                    // Process Initial temperature readings. This should only happen once
-                                    self.processTemperatureReadingsResponse(data.result);
-                                    onReadingsChange && onReadingsChange(event);
-                                }
+                            // Listen for subsequent temperature changes
+                            self.monitorReadings();
+                            break;
 
-                                // Listen for subsequent temperature changes
-                                self.monitorReadings();
-                                break;
-
-                            case MONITOR_REQUEST_ID:
-                                if (data.result) {
-                                    // Process subsequent Temperature readings
-                                    self.processTemperatureReadingsResponse([data.result]);
-                                    onReadingsChange && onReadingsChange(event);
-                                }
-                                break;
-                        }
-                    } else if (!isAuthenticated && data && data.status === 'ok') {
-                        // Process authentication only and Request the initial readings into our service data store
-                        isAuthenticated = true;
-                        self.requestInitialReadings(5);
-                    } else {
-                        // ENHANCMENT: Show specific errors
-                        // "[{"id":2,"error":{"code":501,"message":"Can not apply Arguments to Procedure"}}]"
-                        onError && onError(event);
+                        case MONITOR_REQUEST_ID:
+                            if (data.result) {
+                                // Process subsequent Temperature readings
+                                self.processTemperatureReadingsResponse([data.result]);
+                                onReadingsChange && onReadingsChange(event);
+                            }
+                            break;
                     }
-                };
-
-                socket.onerror = function (event) {
-                    onError && onError(event);
-                };
-            },
-
-            sendMsg: function (msgObject) {
-                socket.send(JSON.stringify(msgObject));
+                }
             },
 
             monitorReadings: function () {
-                var msg = {
-                        calls:
-                            [{
-                                id: MONITOR_REQUEST_ID,
-                                procedure: 'subscribe',
-                                arguments: [
-                                    {alias: ENDPOINT}
-                                ]
-                            }]
-                    };
+                var arguments = [{alias: ENDPOINT}];
+                var msg = {calls: [
+                        {
+                            id: MONITOR_REQUEST_ID,
+                            procedure: 'subscribe',
+                            arguments: arguments
+                        }
+                    ]};
 
-                // Add the since timestamp to the msg
                 var lastReading = this.temperatureReadings[this.temperatureReadings.length - 1];
+
+                // Add the "since" timestamp to the msg
                 if (lastReading) {
-                    msg.calls[0].arguments[1] = {since: lastReading.timestamp + 1};
+                    arguments.push({since: lastReading.timestamp + 1});
                 }
 
-                this.sendMsg(msg);
+                socket.request(msg);
             },
 
             requestInitialReadings: function () {
-                this.sendMsg({calls: [
+                socket.request({calls: [
                     {
                         id: INITIAL_REQUEST_ID,
                         procedure: 'read',
-                        arguments: [
-                            {alias: ENDPOINT},
-                            {limit: this.limit}
-                        ]
+                        arguments: [{alias: ENDPOINT}, {limit: this.limit}]
                     }
                 ]});
             },
@@ -118,14 +95,11 @@ angular.module('components.temperature')
             },
 
             addTemperature: function (temperature) {
-                this.sendMsg({calls: [
+                socket.request({calls: [
                     {
                         id: WRITE_REQUEST_ID,
                         procedure: 'write',
-                        arguments: [
-                            {alias: ENDPOINT},
-                            temperature + ""
-                        ]
+                        arguments: [{alias: ENDPOINT}, temperature + ""]
                     }
                 ]});
             }
